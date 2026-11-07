@@ -13,10 +13,23 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Get all products with their category
-        $products = Product::with('category')->paginate(10);
+        $query = Product::with('category');
+
+        // Filter berdasarkan kata kunci nama produk
+        if ($request->filled('keyword')) {
+            $query->where('name', 'like', '%' . $request->keyword . '%');
+        }
+
+        // Filter berdasarkan kategori
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Gunakan paginate() bawaan Laravel (default misal 5 atau 10 per halaman)
+        $products = $query->paginate($request->input('limit', 5));
+
         return ProductResource::collection($products);
     }
     /**
@@ -34,7 +47,7 @@ class ProductController extends Controller
             'img' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
         // Initialize image path
-        $path = "";
+        $path = null;
         //mengambil file image dari request img
         if ($request->hasFile('img')) {
             // menyimpan file image ke storage pada folder products di disk public
@@ -49,7 +62,7 @@ class ProductController extends Controller
             'stock' => $request->stock,
             //hanya menyimpan path image ke database
             'img' => $path,
-            'slug' => Str::slug($request->name) // Generate slug from name
+            'slug' => Str::slug($request->name) . '-' . time() 
         ]);
         return new ProductResource($product);
     }
@@ -87,7 +100,7 @@ class ProductController extends Controller
             'price' => $request->price,
             'stock' => $request->stock,
             'img' => $request->img,
-            'slug' => Str::slug($request->name) // Generate slug from name
+            'slug' => Str::slug($request->name) . '-' . time() 
         ]);
         return new ProductResource($product);
     }

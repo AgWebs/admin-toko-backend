@@ -6,9 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-// jika primary key bukan 'id', tentukan di sini
     protected $primaryKey = 'product_id';
-//fields yang boleh diisi massal
     protected $fillable = [
         'name',
         'description',
@@ -20,7 +18,6 @@ class Product extends Model
     ];
     public function category()
     {
-        // relasi ke tabel categories
-        return $this->belongsTo(Category::class, 'category_id');
+        return $this->belongsTo(Category::class, 'category_id', 'category_id');
     }
 }
